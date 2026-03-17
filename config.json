@@ -1,0 +1,12 @@
+{
+  "teams": [
+    {"name": "Los Angeles Lakers", "seatgeek_slug": "los-angeles-lakers", "tm_keyword": "Los Angeles Lakers"},
+    {"name": "LA Clippers", "seatgeek_slug": "la-clippers", "tm_keyword": "LA Clippers"}
+  ],
+  "date_range": {
+    "start": "2026-04-03",
+    "end": "2026-04-11"
+  },
+  "check_interval_hours": 6,
+  "notify_on_drop_pct": 5
+}
