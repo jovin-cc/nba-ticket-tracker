@@ -18,10 +18,10 @@ from src.notifier import format_report
 
 def main():
     try:
-        records = fetch_all()
-        if records:
-            save_prices(records)
-        report = format_report(records)
+        games, flat_records = fetch_all()
+        if flat_records:
+            save_prices(flat_records)
+        report = format_report(games)
         print(report)
     except Exception as e:
         logging.exception("Fatal error")

@@ -2,7 +2,7 @@
 import json
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "prices.db")
 OUT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "docs", "data", "latest.json")
@@ -16,7 +16,6 @@ def export():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
 
-    # Get latest check per event
     rows = conn.execute("""
         SELECT p.* FROM price_checks p
         INNER JOIN (
@@ -28,7 +27,6 @@ def export():
 
     games = []
     for r in rows:
-        # Get previous price for change calc
         prev = conn.execute(
             """SELECT lowest_price FROM price_checks
                WHERE event_id=? ORDER BY checked_at DESC LIMIT 1 OFFSET 1""",
@@ -57,12 +55,12 @@ def export():
 
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     data = {
-        "updated_at": datetime.utcnow().isoformat() + "Z",
+        "updated_at": datetime.now(timezone.utc).isoformat(),
         "games": games,
     }
     with open(OUT_PATH, "w") as f:
         json.dump(data, f, indent=2)
-    print(f"Exported {len(games)} games to {OUT_PATH}")
+    print(f"Exported {len(games)} records to {OUT_PATH}")
 
 
 if __name__ == "__main__":

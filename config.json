@@ -11,40 +11,48 @@
   "notify_on_drop_pct": 5,
   "home_games": [
     {
-      "event_id": "espn_401811010",
+      "event_id": "lakers_okc_apr7",
       "team": "Los Angeles Lakers",
       "title": "Oklahoma City Thunder at Los Angeles Lakers",
-      "date": "2026-04-07T22:30:00-04:00",
+      "date": "2026-04-07T19:30:00-07:00",
       "venue": "Crypto.com Arena",
-      "vivid_url": "https://www.vividseats.com/los-angeles-lakers-tickets-cryptocom-arena-4-7-2026--sports-nba-basketball/production/5939587",
-      "espn_url": "https://www.espn.com/nba/game/_/gameId/401811010/thunder-lakers"
+      "sources": {
+        "vividseats": "https://www.vividseats.com/los-angeles-lakers-tickets-cryptocom-arena-4-7-2026--sports-nba-basketball/production/5939587",
+        "stubhub": "https://www.stubhub.com/los-angeles-lakers-los-angeles-tickets-4-7-2026/event/159098520/"
+      }
     },
     {
-      "event_id": "espn_401811040",
+      "event_id": "lakers_suns_apr10",
       "team": "Los Angeles Lakers",
       "title": "Phoenix Suns at Los Angeles Lakers",
-      "date": "2026-04-10T22:30:00-04:00",
+      "date": "2026-04-10T19:30:00-07:00",
       "venue": "Crypto.com Arena",
-      "vivid_url": "https://www.vividseats.com/los-angeles-lakers-tickets-cryptocom-arena-4-10-2026--sports-nba-basketball/production/5939596",
-      "espn_url": "https://www.espn.com/nba/game/_/gameId/401811040/suns-lakers"
+      "sources": {
+        "vividseats": "https://www.vividseats.com/los-angeles-lakers-tickets-cryptocom-arena-4-10-2026--sports-nba-basketball/production/5939596",
+        "stubhub": "https://www.stubhub.com/los-angeles-lakers-los-angeles-tickets-4-10-2026/event/159098506/"
+      }
     },
     {
-      "event_id": "espn_401811011",
+      "event_id": "clippers_mavs_apr7",
       "team": "LA Clippers",
       "title": "Dallas Mavericks at LA Clippers",
-      "date": "2026-04-07T22:30:00-04:00",
+      "date": "2026-04-07T19:30:00-07:00",
       "venue": "Intuit Dome",
-      "vivid_url": "https://www.vividseats.com/la-clippers-tickets-intuit-dome-4-7-2026--sports-nba-basketball/production/5939722",
-      "espn_url": "https://www.espn.com/nba/game/_/gameId/401811011/mavericks-clippers"
+      "sources": {
+        "vividseats": "https://www.vividseats.com/la-clippers-tickets-intuit-dome-4-7-2026--sports-nba-basketball/production/5939722",
+        "stubhub": "https://www.stubhub.com/la-clippers-inglewood-tickets-4-7-2026/event/159098187/"
+      }
     },
     {
-      "event_id": "espn_401811018",
+      "event_id": "clippers_okc_apr8",
       "team": "LA Clippers",
       "title": "Oklahoma City Thunder at LA Clippers",
-      "date": "2026-04-08T22:00:00-04:00",
+      "date": "2026-04-08T19:00:00-07:00",
       "venue": "Intuit Dome",
-      "vivid_url": "https://www.vividseats.com/la-clippers-tickets-intuit-dome-4-8-2026--sports-nba-basketball/production/5939740",
-      "espn_url": "https://www.espn.com/nba/game/_/gameId/401811018/thunder-clippers"
+      "sources": {
+        "vividseats": "https://www.vividseats.com/la-clippers-tickets-intuit-dome-4-8-2026--sports-nba-basketball/production/5939740",
+        "stubhub": null
+      }
     }
   ]
 }

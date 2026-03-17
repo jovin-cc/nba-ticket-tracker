@@ -1,4 +1,4 @@
-from src.db import get_previous, get_first
+from src.db import get_previous
 
 
 def _arrow(current, previous):
@@ -7,46 +7,70 @@ def _arrow(current, previous):
     diff = current - previous
     pct = (diff / previous * 100) if previous else 0
     if abs(pct) < 0.5:
-        return "→ unchanged"
+        return ""
     symbol = "📉" if diff < 0 else "📈"
-    return f"{symbol} {'+' if diff > 0 else ''}{diff:.0f} ({pct:+.1f}%)"
+    return f" {symbol}{diff:+.0f} ({pct:+.1f}%)"
 
 
-def format_report(records: list[dict]) -> str:
-    if not records:
-        return "🏀 No events found yet for the monitored date range. Will check again next cycle."
+def format_report(games: list[dict]) -> str:
+    if not games:
+        return "🏀 No events found yet. Will check again next cycle."
 
     lines = ["🏀 **NBA Ticket Price Update**\n"]
 
-    for r in records:
-        prev = get_previous(r["event_id"])
-        first = get_first(r["event_id"])
+    for g in games:
+        lines.append(f"🎫 **{g['event_title']}**")
+        lines.append(f"📅 {g['event_date'][:10]} | 🏟 {g['venue']}")
 
-        lines.append(f"🎫 **{r['event_title']}**")
-        lines.append(f"📅 {r['event_date']}")
-        lines.append(f"🏟 {r['venue']}")
+        vivid = g.get("vivid")
+        stubhub = g.get("stubhub")
 
-        low = r["lowest_price"]
-        avg = r["average_price"]
+        # Source comparison line
+        source_prices = []
+        if vivid:
+            ov = vivid["overall"]
+            prev = get_previous(f"{g['event_id']}_vividseats")
+            change = _arrow(ov["min_price"], prev["lowest_price"]) if prev and prev.get("lowest_price") else ""
+            source_prices.append(("Vivid Seats", ov["min_price"], change, ov.get("listing_count")))
+        if stubhub:
+            prev = get_previous(f"{g['event_id']}_stubhub")
+            change = _arrow(stubhub["low_price"], prev["lowest_price"]) if prev and prev.get("lowest_price") else ""
+            source_prices.append(("StubHub", stubhub["low_price"], change, None))
 
-        price_line = f"💰 Lowest: ${low:.0f}" if low else "💰 Lowest: N/A"
-        if avg:
-            price_line += f" | Avg: ${avg:.0f}"
-        lines.append(price_line)
+        if source_prices:
+            lines.append("")
+            lines.append("  **Lowest by source:**")
+            for name, price, change, count in sorted(source_prices, key=lambda x: x[1]):
+                count_str = f" ({count} listings)" if count else ""
+                lines.append(f"  • {name}: **${price:.0f}**{change}{count_str}")
 
-        if r["listing_count"]:
-            lines.append(f"📊 {r['listing_count']} listings")
+        # Section breakdown from Vivid Seats
+        if vivid and vivid.get("tiers"):
+            lines.append("")
+            lines.append("  **By section tier:**")
+            tier_order = ["Upper Level", "Mid Level", "Lower Level", "Courtside/Floor", "Other"]
+            for tier in tier_order:
+                if tier not in vivid["tiers"]:
+                    continue
+                t = vivid["tiers"][tier]
+                if t["min"] == t["max"]:
+                    lines.append(f"  • {tier}: ~${t['min']:.0f}")
+                else:
+                    lines.append(f"  • {tier}: ${t['min']:.0f}–${t['max']:.0f} (avg ${t['avg']:.0f})")
 
-        if prev and prev.get("lowest_price") and low:
-            change = _arrow(low, prev["lowest_price"])
-            lines.append(f"  vs last check: {change}")
+        # Overall stats
+        if vivid:
+            ov = vivid["overall"]
+            lines.append("")
+            lines.append(f"  📊 Median: ${ov.get('median_price', 0):.0f} | "
+                        f"Avg: ${ov.get('avg_price', 0):.0f} | "
+                        f"{ov.get('ticket_count', 0)} tickets available")
 
-        if first and first.get("lowest_price") and low and first["id"] != (prev or {}).get("id"):
-            trend = _arrow(low, first["lowest_price"])
-            lines.append(f"  vs first seen: {trend}")
-
-        if r.get("url"):
-            lines.append(f"🔗 {r['url']}")
+        # Links
+        if vivid:
+            lines.append(f"  🔗 VividSeats: {vivid['url']}")
+        if stubhub and stubhub.get("url"):
+            lines.append(f"  🔗 StubHub: {stubhub['url']}")
 
         lines.append("")
 

@@ -4,6 +4,7 @@ import os
 import re
 import json
 import logging
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -32,128 +33,234 @@ def _retry_get(url, params=None, headers=None, retries=3):
     return None
 
 
-def scrape_vivid_price(url: str) -> dict | None:
-    """Scrape price data from Vivid Seats using __NEXT_DATA__."""
+def _classify_section(section_name: str) -> str:
+    """Classify a section name into a tier."""
+    s = section_name.lower()
+    if any(x in s for x in ["courtside", "floor", "vip", "premier", "a1", "a2", "a3", "a4"]):
+        return "Courtside/Floor"
+    if any(x in s for x in ["loge", "lower", "100", "10"]):
+        return "Lower Level"
+    if any(x in s for x in ["middle", "mid", "200", "20", "club"]):
+        return "Mid Level"
+    if any(x in s for x in ["upper", "300", "30", "balcony"]):
+        return "Upper Level"
+    # Section numbers: 100s=lower, 200s=mid, 300s=upper
+    num = re.search(r"(\d+)", section_name)
+    if num:
+        n = int(num.group(1))
+        if n < 100:
+            return "Courtside/Floor"
+        elif n < 200:
+            return "Lower Level"
+        elif n < 300:
+            return "Mid Level"
+        else:
+            return "Upper Level"
+    return "Other"
+
+
+def scrape_vivid_seats(url: str) -> dict | None:
+    """Scrape full price data including section breakdown from Vivid Seats."""
     try:
         r = _retry_get(url)
         if not r:
             return None
-
         m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', r.text, re.DOTALL)
         if not m:
-            logger.warning("No __NEXT_DATA__ found on Vivid Seats page")
             return None
+        pp = json.loads(m.group(1)).get("props", {}).get("pageProps", {})
 
-        nd = json.loads(m.group(1))
-        pp = nd.get("props", {}).get("pageProps", {})
-
-        # Get prices from top deals
-        deals = pp.get("initialTopDealListingsData", {}).get("data", {}).get("topDeals", [])
-        deal_prices = [float(d["price"]) for d in deals if d.get("price")]
-
-        # Get recently sold for context
-        sold = pp.get("initialRecentlySoldListingsData", {}).get("data", {}).get("listings", [])
-        sold_prices = [float(s["price"]) for s in sold if s.get("price")]
-
-        # Urgency data for listing count
-        urgency = pp.get("initialUrgencyVelocityData", {}).get("data", {}).get("items", [])
-        listing_count = None
-        if urgency:
-            udata = urgency[0].get("data", {})
-            listing_count = udata.get("uLT")  # listings long-term count
-
-        lowest = min(deal_prices) if deal_prices else (min(sold_prices) if sold_prices else None)
-        highest = max(deal_prices) if deal_prices else None
-        avg = sum(deal_prices) / len(deal_prices) if deal_prices else None
-
-        if lowest is None:
-            return None
-
-        return {
-            "lowest_price": lowest,
-            "average_price": round(avg, 2) if avg else None,
-            "highest_price": highest,
-            "listing_count": listing_count,
+        # Production details - overall stats
+        prod = pp.get("initialProductionDetailsData", {}).get("data", {})
+        overall = {
+            "min_price": prod.get("minPrice"),
+            "max_price": prod.get("maxPrice"),
+            "avg_price": prod.get("avgPrice"),
+            "median_price": prod.get("medianPrice"),
+            "listing_count": prod.get("listingCount"),
+            "ticket_count": prod.get("ticketCount"),
         }
+
+        # Build section breakdown from top deals + recently sold
+        section_prices = defaultdict(list)
+
+        deals = pp.get("initialTopDealListingsData", {}).get("data", {}).get("topDeals", [])
+        for d in deals:
+            sec = d.get("section", "")
+            price = d.get("price")
+            if sec and price:
+                tier = _classify_section(sec)
+                section_prices[tier].append({"section": sec, "row": d.get("row"), "price": float(price)})
+
+        sold = pp.get("initialRecentlySoldListingsData", {}).get("data", {}).get("listings", [])
+        for s in sold:
+            sec = s.get("zone") or s.get("section", "")
+            price = s.get("price")
+            if sec and price:
+                tier = _classify_section(sec)
+                section_prices[tier].append({"section": sec, "row": s.get("row"), "price": float(price)})
+
+        # Compute tier summaries
+        tiers = {}
+        for tier_name, entries in section_prices.items():
+            prices = [e["price"] for e in entries]
+            tiers[tier_name] = {
+                "min": min(prices),
+                "max": max(prices),
+                "avg": round(sum(prices) / len(prices)),
+                "sample_count": len(prices),
+                "sections": list({e["section"] for e in entries}),
+            }
+
+        return {"overall": overall, "tiers": tiers, "source": "vividseats", "url": url}
     except Exception as e:
-        logger.error(f"Vivid scrape error for {url}: {e}")
+        logger.error(f"Vivid scrape error: {e}")
         return None
 
 
-def fetch_seatgeek(config: dict) -> list[dict]:
-    """Fetch from SeatGeek API."""
-    results = []
-    start = config["date_range"]["start"]
-    end = config["date_range"]["end"]
-
-    for team in config["teams"]:
-        slug = team["seatgeek_slug"]
-        r = _retry_get(
-            "https://api.seatgeek.com/2/events",
-            params={
-                "performers.slug": slug,
-                "datetime_utc.gte": f"{start}T00:00:00",
-                "datetime_utc.lte": f"{end}T23:59:59",
-                "per_page": 25,
-            },
-            headers=None,
-        )
+def scrape_stubhub_grouping(grouping_url: str, target_date: str) -> dict | None:
+    """Get lowPrice from StubHub grouping page JSON-LD for a specific date."""
+    try:
+        r = _retry_get(grouping_url)
         if not r:
-            continue
-        data = r.json()
-        if not data.get("events"):
-            continue
-
-        for ev in data["events"]:
-            stats = ev.get("stats", {})
-            results.append({
-                "event_id": f"sg_{ev['id']}",
-                "event_title": ev.get("title", ""),
-                "event_date": ev.get("datetime_local", ""),
-                "venue": ev.get("venue", {}).get("name", ""),
-                "team": team["name"],
-                "source": "seatgeek",
-                "lowest_price": stats.get("lowest_sg_base_price") or stats.get("lowest_price"),
-                "average_price": stats.get("average_price"),
-                "highest_price": stats.get("highest_price"),
-                "listing_count": stats.get("listing_count"),
-                "url": ev.get("url", ""),
-            })
-    return results
-
-
-def fetch_configured_games(config: dict) -> list[dict]:
-    """Fetch prices for hardcoded home games from Vivid Seats."""
-    results = []
-    for game in config.get("home_games", []):
-        vivid_url = game.get("vivid_url", "")
-        prices = None
-        if vivid_url:
-            logger.info(f"Scraping Vivid Seats for {game['title']}...")
-            prices = scrape_vivid_price(vivid_url)
-
-        results.append({
-            "event_id": game["event_id"],
-            "event_title": game["title"],
-            "event_date": game["date"],
-            "venue": game["venue"],
-            "team": game["team"],
-            "source": "vividseats",
-            "lowest_price": prices["lowest_price"] if prices else None,
-            "average_price": prices.get("average_price") if prices else None,
-            "highest_price": prices.get("highest_price") if prices else None,
-            "listing_count": prices.get("listing_count") if prices else None,
-            "url": vivid_url or game.get("espn_url", ""),
-        })
-    return results
+            return None
+        ld_blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', r.text, re.DOTALL)
+        for block in ld_blocks:
+            try:
+                d = json.loads(block)
+                for item in d.get("@graph", [d] if not isinstance(d, list) else d):
+                    if item.get("@type") != "SportsEvent":
+                        continue
+                    if target_date not in str(item.get("startDate", "")):
+                        continue
+                    if "PARKING" in item.get("name", ""):
+                        continue
+                    offers = item.get("offers", {})
+                    low = offers.get("lowPrice")
+                    if low:
+                        return {
+                            "low_price": float(low),
+                            "url": item.get("url", ""),
+                            "source": "stubhub",
+                        }
+            except (json.JSONDecodeError, ValueError):
+                continue
+        return None
+    except Exception as e:
+        logger.error(f"StubHub scrape error: {e}")
+        return None
 
 
 def fetch_all() -> list[dict]:
     config = load_config()
-    results = fetch_configured_games(config)
-    sg_results = fetch_seatgeek(config)
-    existing_ids = {r["event_id"] for r in results}
-    for r in sg_results:
-        if r["event_id"] not in existing_ids:
-            results.append(r)
-    return results
+    results = []
+
+    # StubHub grouping URLs to batch-fetch
+    stubhub_groupings = {
+        "lakers_vs_thunder": "https://www.stubhub.com/lakers-vs-thunder-tickets/grouping/431702",
+        "lakers_vs_suns": "https://www.stubhub.com/lakers-vs-suns-tickets/grouping/431704",
+        "mavericks_vs_clippers": "https://www.stubhub.com/mavericks-vs-clippers-tickets/grouping/430402",
+        "thunder_vs_clippers": "https://www.stubhub.com/thunder-vs-clippers-tickets/grouping/430398",
+    }
+
+    stubhub_map = {
+        "lakers_okc_apr7": ("lakers_vs_thunder", "2026-04-07"),
+        "lakers_suns_apr10": ("lakers_vs_suns", "2026-04-10"),
+        "clippers_mavs_apr7": ("mavericks_vs_clippers", "2026-04-07"),
+        "clippers_okc_apr8": ("thunder_vs_clippers", "2026-04-08"),
+    }
+
+    # Pre-fetch StubHub grouping pages
+    stubhub_cache = {}
+    for key, url in stubhub_groupings.items():
+        stubhub_cache[key] = _retry_get(url)
+
+    for game in config.get("home_games", []):
+        game_id = game["event_id"]
+        sources = game.get("sources", {})
+
+        game_result = {
+            "event_id": game_id,
+            "event_title": game["title"],
+            "event_date": game["date"],
+            "venue": game["venue"],
+            "team": game["team"],
+            "vivid": None,
+            "stubhub": None,
+            "seatgeek": None,
+        }
+
+        # Vivid Seats
+        vivid_url = sources.get("vividseats")
+        if vivid_url:
+            game_result["vivid"] = scrape_vivid_seats(vivid_url)
+
+        # StubHub - from cached grouping pages
+        sh_info = stubhub_map.get(game_id)
+        if sh_info:
+            grouping_key, target_date = sh_info
+            cached_resp = stubhub_cache.get(grouping_key)
+            if cached_resp:
+                # Parse from cached response
+                ld_blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', cached_resp.text, re.DOTALL)
+                for block in ld_blocks:
+                    try:
+                        d = json.loads(block)
+                        for item in d.get("@graph", [d] if not isinstance(d, list) else d):
+                            if item.get("@type") != "SportsEvent":
+                                continue
+                            if target_date not in str(item.get("startDate", "")):
+                                continue
+                            if "PARKING" in item.get("name", ""):
+                                continue
+                            offers = item.get("offers", {})
+                            low = offers.get("lowPrice")
+                            if low:
+                                game_result["stubhub"] = {
+                                    "low_price": float(low),
+                                    "url": item.get("url", ""),
+                                    "source": "stubhub",
+                                }
+                    except (json.JSONDecodeError, ValueError):
+                        continue
+
+        # SeatGeek API (may not have events yet)
+        # Will be populated from the API when available
+
+        results.append(game_result)
+
+    # Also store flat records for DB compatibility
+    flat_records = []
+    for g in results:
+        if g["vivid"]:
+            v = g["vivid"]
+            flat_records.append({
+                "event_id": f"{g['event_id']}_vividseats",
+                "event_title": g["event_title"],
+                "event_date": g["event_date"],
+                "venue": g["venue"],
+                "team": g["team"],
+                "source": "vividseats",
+                "lowest_price": v["overall"]["min_price"],
+                "average_price": v["overall"]["avg_price"],
+                "highest_price": v["overall"]["max_price"],
+                "listing_count": v["overall"]["listing_count"],
+                "url": v["url"],
+            })
+        if g["stubhub"]:
+            s = g["stubhub"]
+            flat_records.append({
+                "event_id": f"{g['event_id']}_stubhub",
+                "event_title": g["event_title"],
+                "event_date": g["event_date"],
+                "venue": g["venue"],
+                "team": g["team"],
+                "source": "stubhub",
+                "lowest_price": s["low_price"],
+                "average_price": None,
+                "highest_price": None,
+                "listing_count": None,
+                "url": s["url"],
+            })
+
+    return results, flat_records
