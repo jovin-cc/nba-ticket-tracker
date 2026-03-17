@@ -25,7 +25,7 @@ def format_report(games: list[dict]) -> str:
         vivid = g.get("vivid")
         stubhub = g.get("stubhub")
 
-        # Source comparison line
+        # Source comparison
         source_prices = []
         if vivid:
             ov = vivid["overall"]
@@ -44,19 +44,25 @@ def format_report(games: list[dict]) -> str:
                 count_str = f" ({count} listings)" if count else ""
                 lines.append(f"  • {name}: **${price:.0f}**{change}{count_str}")
 
-        # Section breakdown from Vivid Seats
-        if vivid and vivid.get("tiers"):
+        # Section-level listings from Vivid Seats (deals + recently sold)
+        if vivid and vivid.get("listings"):
             lines.append("")
-            lines.append("  **By section tier:**")
-            tier_order = ["Upper Level", "Mid Level", "Lower Level", "Courtside/Floor", "Other"]
-            for tier in tier_order:
-                if tier not in vivid["tiers"]:
-                    continue
-                t = vivid["tiers"][tier]
-                if t["min"] == t["max"]:
-                    lines.append(f"  • {tier}: ~${t['min']:.0f}")
-                else:
-                    lines.append(f"  • {tier}: ${t['min']:.0f}–${t['max']:.0f} (avg ${t['avg']:.0f})")
+            lines.append("  **Available deals (section / row / price):**")
+            for item in vivid["listings"]["deals"]:
+                lines.append(f"  • {item['section']} · Row {item['row']} — **${item['price']:.0f}**")
+
+            if vivid["listings"]["recent_sold"]:
+                lines.append("")
+                lines.append("  **Recently sold:**")
+                # Deduplicate and show unique section/row combos
+                seen = set()
+                for item in vivid["listings"]["recent_sold"]:
+                    key = f"{item['section']}_{item['row']}_{item['price']}"
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    zone_str = f" ({item['zone']})" if item.get("zone") and item["zone"] != item["section"] else ""
+                    lines.append(f"  • Sec {item['section']}{zone_str} · Row {item['row']} — ${item['price']:.0f}")
 
         # Overall stats
         if vivid:

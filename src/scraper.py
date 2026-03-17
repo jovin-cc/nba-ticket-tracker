@@ -84,35 +84,32 @@ def scrape_vivid_seats(url: str) -> dict | None:
         # Build section breakdown from top deals + recently sold
         section_prices = defaultdict(list)
 
+        # Raw listing data: deals and recently sold with section codes
+        deals_raw = []
         deals = pp.get("initialTopDealListingsData", {}).get("data", {}).get("topDeals", [])
         for d in deals:
-            sec = d.get("section", "")
-            price = d.get("price")
-            if sec and price:
-                tier = _classify_section(sec)
-                section_prices[tier].append({"section": sec, "row": d.get("row"), "price": float(price)})
+            if d.get("section") and d.get("price"):
+                deals_raw.append({
+                    "section": d["section"],
+                    "row": d.get("row", ""),
+                    "price": float(d["price"]),
+                })
 
+        sold_raw = []
         sold = pp.get("initialRecentlySoldListingsData", {}).get("data", {}).get("listings", [])
         for s in sold:
-            sec = s.get("zone") or s.get("section", "")
-            price = s.get("price")
-            if sec and price:
-                tier = _classify_section(sec)
-                section_prices[tier].append({"section": sec, "row": s.get("row"), "price": float(price)})
+            if s.get("section") and s.get("price"):
+                sold_raw.append({
+                    "section": s["section"],
+                    "zone": s.get("zone", ""),
+                    "row": s.get("row", ""),
+                    "price": float(s["price"]),
+                    "quantity": s.get("quantity"),
+                })
 
-        # Compute tier summaries
-        tiers = {}
-        for tier_name, entries in section_prices.items():
-            prices = [e["price"] for e in entries]
-            tiers[tier_name] = {
-                "min": min(prices),
-                "max": max(prices),
-                "avg": round(sum(prices) / len(prices)),
-                "sample_count": len(prices),
-                "sections": list({e["section"] for e in entries}),
-            }
+        listings = {"deals": deals_raw, "recent_sold": sold_raw}
 
-        return {"overall": overall, "tiers": tiers, "source": "vividseats", "url": url}
+        return {"overall": overall, "listings": listings, "source": "vividseats", "url": url}
     except Exception as e:
         logger.error(f"Vivid scrape error: {e}")
         return None
