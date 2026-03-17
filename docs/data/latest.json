@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-03-17T03:38:28.769361Z",
+  "updated_at": "2026-03-17T03:39:37.138185Z",
   "games": [
     {
       "title": "Oklahoma City Thunder at Los Angeles Lakers",
@@ -7,9 +7,9 @@
       "venue": "Crypto.com Arena",
       "team": "Los Angeles Lakers",
       "source": "vividseats",
-      "lowest_price": 202.0,
-      "average_price": 256.0,
-      "highest_price": 304.0,
+      "lowest_price": 280.53,
+      "average_price": 365.61,
+      "highest_price": 473.79,
       "listing_count": 465,
       "url": "https://www.vividseats.com/los-angeles-lakers-tickets-cryptocom-arena-4-7-2026--sports-nba-basketball/production/5939587",
       "price_change": null
@@ -20,9 +20,9 @@
       "venue": "Intuit Dome",
       "team": "LA Clippers",
       "source": "vividseats",
-      "lowest_price": 23.0,
-      "average_price": 45.6,
-      "highest_price": 119.0,
+      "lowest_price": 33.43,
+      "average_price": 64.35,
+      "highest_price": 165.5,
       "listing_count": 178,
       "url": "https://www.vividseats.com/la-clippers-tickets-intuit-dome-4-7-2026--sports-nba-basketball/production/5939722",
       "price_change": null
@@ -33,9 +33,9 @@
       "venue": "Intuit Dome",
       "team": "LA Clippers",
       "source": "vividseats",
-      "lowest_price": 26.0,
-      "average_price": 28.6,
-      "highest_price": 31.0,
+      "lowest_price": 38.19,
+      "average_price": 41.28,
+      "highest_price": 44.14,
       "listing_count": 200,
       "url": "https://www.vividseats.com/la-clippers-tickets-intuit-dome-4-8-2026--sports-nba-basketball/production/5939740",
       "price_change": null
@@ -46,9 +46,9 @@
       "venue": "Crypto.com Arena",
       "team": "Los Angeles Lakers",
       "source": "vividseats",
-      "lowest_price": 180.0,
-      "average_price": 211.8,
-      "highest_price": 238.0,
+      "lowest_price": 249.76,
+      "average_price": 293.95,
+      "highest_price": 330.24,
       "listing_count": 385,
       "url": "https://www.vividseats.com/los-angeles-lakers-tickets-cryptocom-arena-4-10-2026--sports-nba-basketball/production/5939596",
       "price_change": null
