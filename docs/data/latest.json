@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-03-20T05:08:56.947094+00:00",
+  "updated_at": "2026-03-20T07:59:30.954318+00:00",
   "games": [
     {
       "title": "Dallas Mavericks at LA Clippers",
@@ -21,11 +21,11 @@
       "team": "LA Clippers",
       "source": "vividseats",
       "lowest_price": 11.27,
-      "average_price": 207.94,
+      "average_price": 208.71,
       "highest_price": 9522.0,
-      "listing_count": 740,
+      "listing_count": 747,
       "url": "https://www.vividseats.com/la-clippers-tickets-intuit-dome-4-7-2026--sports-nba-basketball/production/5939722",
-      "price_change": -0.7300000000000004
+      "price_change": 0.0
     },
     {
       "title": "Oklahoma City Thunder at Los Angeles Lakers",
@@ -38,7 +38,7 @@
       "highest_price": null,
       "listing_count": null,
       "url": "https://www.stubhub.com/los-angeles-lakers-los-angeles-tickets-4-7-2026/event/159098520/",
-      "price_change": -1.2799999999999727
+      "price_change": 0.0
     },
     {
       "title": "Oklahoma City Thunder at Los Angeles Lakers",
@@ -47,11 +47,11 @@
       "team": "Los Angeles Lakers",
       "source": "vividseats",
       "lowest_price": 121.0,
-      "average_price": 563.75,
+      "average_price": 569.82,
       "highest_price": 15039.0,
-      "listing_count": 1005,
+      "listing_count": 1016,
       "url": "https://www.vividseats.com/los-angeles-lakers-tickets-cryptocom-arena-4-7-2026--sports-nba-basketball/production/5939587",
-      "price_change": 7.0
+      "price_change": 0.0
     },
     {
       "title": "Oklahoma City Thunder at Los Angeles Lakers",
@@ -85,12 +85,12 @@
       "venue": "Intuit Dome",
       "team": "LA Clippers",
       "source": "vividseats",
-      "lowest_price": 20.9,
-      "average_price": 230.83,
+      "lowest_price": 19.95,
+      "average_price": 231.24,
       "highest_price": 7481.0,
-      "listing_count": 739,
+      "listing_count": 748,
       "url": "https://www.vividseats.com/la-clippers-tickets-intuit-dome-4-8-2026--sports-nba-basketball/production/5939740",
-      "price_change": -0.3500000000000014
+      "price_change": -0.9499999999999993
     },
     {
       "title": "Oklahoma City Thunder at LA Clippers",
@@ -125,11 +125,11 @@
       "team": "Los Angeles Lakers",
       "source": "vividseats",
       "lowest_price": 106.0,
-      "average_price": 504.1,
+      "average_price": 503.37,
       "highest_price": 23527.0,
-      "listing_count": 1027,
+      "listing_count": 1043,
       "url": "https://www.vividseats.com/los-angeles-lakers-tickets-cryptocom-arena-4-10-2026--sports-nba-basketball/production/5939596",
-      "price_change": -3.0
+      "price_change": 0.0
     },
     {
       "title": "Phoenix Suns at Los Angeles Lakers",
