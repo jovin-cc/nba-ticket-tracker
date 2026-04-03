@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-03T14:27:51.971991+00:00",
+  "updated_at": "2026-04-03T19:54:42.666778+00:00",
   "games": [
     {
       "title": "Dallas Mavericks at LA Clippers",
@@ -7,12 +7,12 @@
       "venue": "Intuit Dome",
       "team": "LA Clippers",
       "source": "stubhub",
-      "lowest_price": 14.41,
+      "lowest_price": 14.29,
       "average_price": null,
       "highest_price": null,
       "listing_count": null,
       "url": "https://www.stubhub.com/la-clippers-inglewood-tickets-4-7-2026/event/159098187/",
-      "price_change": 0.0
+      "price_change": -0.120000000000001
     },
     {
       "title": "Dallas Mavericks at LA Clippers",
@@ -33,12 +33,12 @@
       "venue": "Crypto.com Arena",
       "team": "Los Angeles Lakers",
       "source": "stubhub",
-      "lowest_price": 129.52,
+      "lowest_price": 103.97,
       "average_price": null,
       "highest_price": null,
       "listing_count": null,
       "url": "https://www.stubhub.com/los-angeles-lakers-los-angeles-tickets-4-7-2026/event/159098520/",
-      "price_change": -6.639999999999986
+      "price_change": -25.55000000000001
     },
     {
       "title": "Oklahoma City Thunder at Los Angeles Lakers",
@@ -111,12 +111,12 @@
       "venue": "Crypto.com Arena",
       "team": "Los Angeles Lakers",
       "source": "stubhub",
-      "lowest_price": 95.31,
+      "lowest_price": 94.44,
       "average_price": null,
       "highest_price": null,
       "listing_count": null,
       "url": "https://www.stubhub.com/los-angeles-lakers-los-angeles-tickets-4-10-2026/event/159098506/",
-      "price_change": 0.0
+      "price_change": -0.8700000000000045
     },
     {
       "title": "Phoenix Suns at Los Angeles Lakers",
