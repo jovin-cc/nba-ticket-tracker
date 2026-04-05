@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-05T05:54:46.255012+00:00",
+  "updated_at": "2026-04-05T08:03:22.668986+00:00",
   "games": [
     {
       "title": "Dallas Mavericks at LA Clippers",
@@ -12,7 +12,7 @@
       "highest_price": null,
       "listing_count": null,
       "url": "https://www.stubhub.com/la-clippers-inglewood-tickets-4-7-2026/event/159098187/",
-      "price_change": 1.6500000000000004
+      "price_change": 0.0
     },
     {
       "title": "Dallas Mavericks at LA Clippers",
@@ -38,7 +38,7 @@
       "highest_price": null,
       "listing_count": null,
       "url": "https://www.stubhub.com/los-angeles-lakers-los-angeles-tickets-4-7-2026/event/159098520/",
-      "price_change": -29.08
+      "price_change": 0.0
     },
     {
       "title": "Oklahoma City Thunder at Los Angeles Lakers",
