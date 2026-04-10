@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-10T14:40:26.820385+00:00",
+  "updated_at": "2026-04-10T19:57:51.992222+00:00",
   "games": [
     {
       "title": "Dallas Mavericks at LA Clippers",
@@ -111,12 +111,12 @@
       "venue": "Crypto.com Arena",
       "team": "Los Angeles Lakers",
       "source": "stubhub",
-      "lowest_price": 55.5,
+      "lowest_price": 40.63,
       "average_price": null,
       "highest_price": null,
       "listing_count": null,
       "url": "https://www.stubhub.com/los-angeles-lakers-los-angeles-tickets-4-10-2026/event/159098506/",
-      "price_change": -5.57
+      "price_change": -14.869999999999997
     },
     {
       "title": "Phoenix Suns at Los Angeles Lakers",
